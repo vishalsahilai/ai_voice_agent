@@ -53,4 +53,32 @@ Return ONLY this JSON — no markdown, no explanation, no extra text:
   "reasoning": "<one short sentence>"
 }
 """
+class EmotionDetector:
+    """
+    Detects emotion from transcribed user text.
+ 
+    Usage:
+        detector = EmotionDetector(gemini_service)
+        result = detector.detect("I'm so confused about this!")
+        # EmotionResult(emotion='confused', confidence=0.92, reasoning='...')
+    """
+ 
+    def __init__(self, gemini_service: GeminiService) -> None:
+        self._gemini = gemini_service
+ 
+    def detect(self, user_text: str) -> EmotionResult:
+        """
+        Synchronous detection — call via asyncio.to_thread() from async code.
+ 
+        Falls back to 'neutral' on any error so the pipeline never crashes.
+        """
+        if not user_text or not user_text.strip():
+            return EmotionResult(emotion="neutral", confidence=1.0, reasoning="Empty input.")
+ 
+        try:
+            raw = self._call_gemini(user_text.strip())
+            return self._parse(raw)
+        except Exception as exc:
+            logger.warning("EmotionDetector: detection failed — %s", exc)
+            return EmotionResult(emotion="neutral", confidence=1.0, reasoning="Detection error.")
  
