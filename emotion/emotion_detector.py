@@ -103,3 +103,23 @@ class EmotionDetector:
         ]
  
         return self._gemini.generate_reply_from_contents(contents)
+ 
+    def _parse(self, raw: str) -> EmotionResult:
+        """
+        Safely parses Gemini's JSON response.
+        Falls back to neutral on any parse error.
+        """
+        try:
+            cleaned = raw.strip()
+            if cleaned.startswith("```"):
+                lines = cleaned.splitlines()
+                cleaned = "\n".join(
+                    line for line in lines
+                    if not line.startswith("```")
+                ).strip()
+ 
+            data = json.loads(cleaned)
+ 
+            emotion = str(data.get("emotion", "neutral")).lower()
+            if emotion not in VALID_EMOTIONS:
+                logger.warning("EmotionDetector: unknown emotion '%s', defaulting to neutral", emotion)
