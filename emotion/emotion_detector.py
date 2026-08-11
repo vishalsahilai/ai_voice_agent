@@ -123,3 +123,20 @@ class EmotionDetector:
             emotion = str(data.get("emotion", "neutral")).lower()
             if emotion not in VALID_EMOTIONS:
                 logger.warning("EmotionDetector: unknown emotion '%s', defaulting to neutral", emotion)
+                emotion = "neutral"
+ 
+            confidence = float(data.get("confidence", 0.8))
+            confidence = max(0.0, min(1.0, confidence))
+ 
+            reasoning = str(data.get("reasoning", ""))
+ 
+            return EmotionResult(
+                emotion=emotion,  
+                confidence=confidence,
+                reasoning=reasoning,
+            )
+ 
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
+            logger.warning("EmotionDetector: parse error — %s | raw=%r", exc, raw)
+            return EmotionResult(emotion="neutral", confidence=1.0, reasoning="Parse error.")
+ 
