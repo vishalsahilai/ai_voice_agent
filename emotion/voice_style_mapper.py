@@ -102,3 +102,20 @@ class VoiceStyleMapper:
         """
         from emotion.emotion_detector import EmotionResult as _ER
         return self.map(_ER(emotion=emotion, confidence=confidence, reasoning=""))
+
+    # Internal helpers
+    @staticmethod
+    def _blend(a: VoiceStyle, b: VoiceStyle, t: float) -> VoiceStyle:
+        """
+        Linear interpolation between style `a` (t=1.0) and style `b` (t=0.0).
+        """
+        def lerp(x: float, y: float) -> float:
+            return x * t + y * (1.0 - t)
+ 
+        return VoiceStyle(
+            stability=round(lerp(a.stability, b.stability), 3),
+            similarity_boost=round(lerp(a.similarity_boost, b.similarity_boost), 3),
+            style=round(lerp(a.style, b.style), 3),
+            speed=round(lerp(a.speed, b.speed), 3),
+        )
+ 
