@@ -118,4 +118,21 @@ class VoiceStyleMapper:
             style=round(lerp(a.style, b.style), 3),
             speed=round(lerp(a.speed, b.speed), 3),
         )
+
+    # Debug helper
  
+    @staticmethod
+    def describe() -> str:
+        """
+        Returns a human-readable table of all emotion → voice style mappings.
+        Useful for logging at startup.
+        """
+        lines = ["Emotion Voice Style Map:"]
+        lines.append(f"  {'Emotion':<12} {'Stability':>9} {'SimilarityBoost':>16} {'Style':>6} {'Speed':>6}")
+        lines.append("  " + "-" * 55)
+        for emotion, style in _EMOTION_MAP.items():
+            lines.append(
+                f"  {emotion:<12} {style.stability:>9.2f} {style.similarity_boost:>16.2f} "
+                f"{style.style:>6.2f} {style.speed:>6.2f}"
+            )
+        return "\n".join(lines)
