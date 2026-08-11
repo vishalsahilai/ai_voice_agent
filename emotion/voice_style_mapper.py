@@ -82,4 +82,17 @@ class VoiceStyleMapper:
     """
 
     CONFIDENCE_THRESHOLD: float = 0.60
+
+    def map(self, result: EmotionResult) -> VoiceStyle:
+        """
+        Returns a VoiceStyle for the given EmotionResult.
+        Blends toward neutral if confidence < CONFIDENCE_THRESHOLD.
+        """
+        target = _EMOTION_MAP.get(result.emotion, _NEUTRAL_STYLE)
+ 
+        if result.confidence >= self.CONFIDENCE_THRESHOLD:
+            return target
+
+        blend_factor = result.confidence / self.CONFIDENCE_THRESHOLD 
+        return self._blend(target, _NEUTRAL_STYLE, blend_factor)
  
