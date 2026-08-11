@@ -30,8 +30,8 @@ VALID_EMOTIONS: set[str] = {
 @dataclass
 class EmotionResult:
     emotion: EmotionLabel
-    confidence: float  # 0.0 – 1.0
-    reasoning: str     # short explanation (for logging / debug)
+    confidence: float 
+    reasoning: str    
  
  
 _SYSTEM_PROMPT = """\
@@ -81,4 +81,25 @@ class EmotionDetector:
         except Exception as exc:
             logger.warning("EmotionDetector: detection failed — %s", exc)
             return EmotionResult(emotion="neutral", confidence=1.0, reasoning="Detection error.")
+
+   # Internal helpers
+    def _call_gemini(self, text: str) -> str:
+        """
+        Calls Gemini with a short classify prompt.
+        Reuses GeminiService's key rotation under the hood.
+        """
+        prompt_message = f"User message: \"{text}\""
+
+        from google.genai import types  # type: ignore
  
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part(text=_SYSTEM_PROMPT),
+                    types.Part(text=prompt_message),
+                ],
+            )
+        ]
+ 
+        return self._gemini.generate_reply_from_contents(contents)
