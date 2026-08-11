@@ -1,6 +1,6 @@
 from functools import lru_cache
-from typing import List
-
+from typing import List, Optional
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -51,42 +51,47 @@ class Settings(BaseSettings):
     @property
     def ELEVENLABS_ACCOUNT_POOL(self) -> List[dict]:
         """
-        Ordered list of {"api_key": ..., "voice_id": ...} pairs — a
-        slot is only included if BOTH its key and voice ID are set.
-        A key with no matching voice ID is useless (nothing to
-        synthesize with), so it's silently dropped rather than
-        included half-broken.
+        Returns list of {api_key, voice_id} pairs.
+        Key and voice rotate TOGETHER — a cloned voice only exists
+        on the account it was cloned on.
         """
-        pairs = [
-            (self.ELEVENLABS_API_KEYS1, self.ELEVENLABS_VOICE_ID1),
-            (self.ELEVENLABS_API_KEYS2, self.ELEVENLABS_VOICE_ID2),
-            (self.ELEVENLABS_API_KEYS3, self.ELEVENLABS_VOICE_ID3),
-        ]
-        return [
-            {"api_key": key.strip(), "voice_id": voice.strip()}
-            for key, voice in pairs
-            if key.strip() and voice.strip()
-        ]
-
+        pool = []
+        for i in range(1, 6):
+            key = getattr(self, f"ELEVENLABS_API_KEY{i}", "")
+            voice = getattr(self, f"ELEVENLABS_VOICE_ID{i}", "")
+            if key and voice:
+                pool.append({"api_key": key, "voice_id": voice})
+        return pool
+ 
     #  Audio 
     AUDIO_SAMPLE_RATE: int = 16000
     AUDIO_CHUNK_MS: int = 30  
     SILENCE_THRESHOLD_MS: int = 700  
 
 
-    #  RAG (Pinecone + HuggingFace)
+    # Pinecone (RAG vector store)
     PINECONE_API_KEY: str = ""
     PINECONE_INDEX_NAME: str = "voice-agent"
     PINECONE_CLOUD: str = "aws"
     PINECONE_REGION: str = "us-east-1"
+
+    # HuggingFace (embeddings)
     EMBEDDING_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
     EMBEDDING_DIMENSION: int = 384
     RAG_TOP_K: int = 3
+    HF_TOKEN: Optional[str] = Field(default=None)
 
     # Memory (MongoDB)
     MONGODB_URI: str = ""
     MONGODB_DB_NAME: str = "ai_voice_agent"
     SESSION_EXPIRY_HOURS: int = 2
+    MEMORY_RAW_TURNS_LIMIT: int = 6
+    MEMORY_SUMMARIZE_AFTER: int = 10
+
+    # Phase 6 — Emotion Detection
+    EMOTION_DETECTION_ENABLED: bool = True
+    EMOTION_CONFIDENCE_THRESHOLD: float = 0.60
+    EMOTION_LOG_RESULTS: bool = True
 
 
 @lru_cache
