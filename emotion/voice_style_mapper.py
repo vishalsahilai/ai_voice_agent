@@ -95,4 +95,10 @@ class VoiceStyleMapper:
 
         blend_factor = result.confidence / self.CONFIDENCE_THRESHOLD 
         return self._blend(target, _NEUTRAL_STYLE, blend_factor)
- 
+
+    def map_by_label(self, emotion: EmotionLabel, confidence: float = 1.0) -> VoiceStyle:
+        """
+        Convenience method — map directly by label without an EmotionResult object.
+        """
+        from emotion.emotion_detector import EmotionResult as _ER
+        return self.map(_ER(emotion=emotion, confidence=confidence, reasoning=""))
