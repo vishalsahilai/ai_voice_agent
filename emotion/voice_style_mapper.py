@@ -68,4 +68,18 @@ _EMOTION_MAP: Dict[EmotionLabel, VoiceStyle] = {
         speed=0.93,
     ),
 }
+
+ 
+class VoiceStyleMapper:
+    """
+    Maps an EmotionResult → VoiceStyle, blending toward neutral
+    when confidence is low.
+ 
+    Usage:
+        mapper = VoiceStyleMapper()
+        style  = mapper.map(emotion_result)
+        # VoiceStyle(stability=0.65, similarity_boost=0.80, style=0.35, speed=1.05)
+    """
+
+    CONFIDENCE_THRESHOLD: float = 0.60
  
