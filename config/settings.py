@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     ELEVENLABS_VOICE_ID7: str = ""
     ELEVENLABS_API_KEYS8: str = ""
     ELEVENLABS_VOICE_ID8: str = ""
-    ELEVENLABS_MODEL_ID: str = "eleven_flash_v2_5"
+    ELEVENLABS_MODEL_ID: str = "eleven_flash_v2"
 
     @property
     def ELEVENLABS_ACCOUNT_POOL(self) -> List[dict]:
